@@ -1,0 +1,9 @@
+# python>=3.12
+ipykernel
+numpy
+pandas
+jinja2 # styling
+matplotlib
+seaborn
+scikit-learn
+kaggle
