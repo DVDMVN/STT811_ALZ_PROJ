@@ -9,3 +9,4 @@ scikit-learn
 kaggle
 imbalanced-learn
 xgboost
+streamlit
