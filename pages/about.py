@@ -185,7 +185,7 @@ def main():
 
         st.write(
             """
-                **New data set after processing:**
+                **New data set after processing:** 
             """
         )
 
@@ -259,6 +259,7 @@ def main():
 
         run_feature_importance_analysis(estimators, X, y, feature_names)
 
+
         st.write(
             """
               Find the most important features through visualization：
@@ -266,7 +267,7 @@ def main():
         )
       
         plot_feature_importance(estimators["RandomForest"], X, y, feature_names, "RandomForest")
-        
+
+
 if __name__ == "__main__":
     main()
-
