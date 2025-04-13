@@ -59,11 +59,11 @@ def get_feature_importances(model, feature_names):
     else:
         return None
 
-def run_feature_importance_analysis(num_importances=5):
+def run_feature_importance_analysis(estimators, X, y, feature_names, num_importances=5):
     fitted_models = {}
     for name, model in estimators.items():
         print(f"Fitting {name} ...")
-        model.fit(numerical_data, target)
+        model.fit(X, y)
         fitted_models[name] = model
 
     for name, model in fitted_models.items():
@@ -75,27 +75,33 @@ def run_feature_importance_analysis(num_importances=5):
         else:
             print(f"\n{name} does not provide a direct feature importance measure.")
 
-def plot_feature_importance(model_name, num_importances = 5):
-    if model_name in estimators.keys():
-        print(f"Fitting {model_name} ...")
-        model = estimators[model_name]        
-        model.fit(numerical_data, target)
-        print("Finished fitting")
-        importances = get_feature_importances(model, numerical_data.columns)
-        sorted_importances = sorted(importances, key=lambda x: x[1], reverse=True)
-        top_importances = sorted_importances[:num_importances]
-        # Separate names and values for plotting
-        labels = [t[0] for t in top_importances]
-        values = [t[1] for t in top_importances]
-        
-        # Create a bar plot
-        plt.figure(figsize=(8, 5))
-        plt.barh(range(len(values)), values)
-        plt.yticks(range(len(values)), labels)
-        plt.title(f"Feature Importances ({model_name})")
-        plt.xlabel("importance")
-        plt.ylabel("Feature")
-        plt.show()
+def plot_feature_importance(model_name, estimators, X, y, feature_names, num_importances=5):
+    if model_name not in estimators:
+        st.warning(f"Model '{model_name}' not found.")
+        return
+
+    st.write(f"Training model: {model_name}")
+    model = estimators[model_name]
+    model.fit(X, y)
+    st.success("Model training complete.")
+
+    importances = get_feature_importances(model, feature_names)
+    if importances is None:
+        st.warning(f"{model_name} does not provide feature importance.")
+        return
+
+    sorted_importances = sorted(importances, key=lambda x: x[1], reverse=True)
+    top_importances = sorted_importances[:num_importances]
+
+    labels = [t[0] for t in top_importances]
+    values = [t[1] for t in top_importances]
+
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.barh(labels[::-1], values[::-1])  # Plot from highest to lowest
+    ax.set_title(f"Top {num_importances} Feature Importances: {model_name}")
+    ax.set_xlabel("Importance")
+    ax.set_ylabel("Feature")
+    st.pyplot(fig)
 
 
 def main():
@@ -179,7 +185,7 @@ def main():
 
         st.write(
             """
-                New data set after processing: 
+                **New data set after processing:**
             """
         )
 
@@ -242,9 +248,7 @@ def main():
     with tab4:
         st.subheader("Feature Selection")
 
-        st.write("Analysis based on the encoded dataset:")
-
-        alzheimers_encoded.head()
+        st.write("Exploratory analysis based on the coded dataset.")
       
         st.write(
             """
@@ -265,3 +269,4 @@ def main():
         
 if __name__ == "__main__":
     main()
+
