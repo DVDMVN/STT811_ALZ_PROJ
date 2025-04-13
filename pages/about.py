@@ -261,7 +261,7 @@ def main():
 
         st.write(
             """
-              Find the top 5 most important features through visualization：
+              Find the most important features through visualization：
             """
         )
       
