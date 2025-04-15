@@ -18,6 +18,7 @@ import time
 from functools import wraps
 from sklearn.model_selection import train_test_split, KFold
 from sklearn.model_selection import cross_validate
+from util import load_data
 
 def time_it():
     def decorator(func):
@@ -103,14 +104,9 @@ def plot_feature_importance(model_name, estimators, X, y, feature_names, num_imp
     ax.set_ylabel("Feature")
     st.pyplot(fig)
 
-
 def main():
     st.title("About the Data 💾")
-
-    DATA_URL_1 = ('data/alzheimers.csv')
-    DATA_URL_2 = ('data/alzheimers_encoded.csv')
-    alzheimers = pd.read_csv(DATA_URL_1)
-    alzheimers_encoded = pd.read_csv(DATA_URL_2)
+    alzheimers, alzheimers_encoded = load_data()
 
     X = alzheimers_encoded.drop(columns=["Alzheimers_Diagnosis_Yes"])
     y = alzheimers_encoded["Alzheimers_Diagnosis_Yes"]
@@ -256,9 +252,7 @@ def main():
               We will only be doing feature importance analysis on those models that have such attributes:
             """
         )
-
         run_feature_importance_analysis(estimators, X, y, feature_names)
-
 
         st.write(
             """
@@ -266,7 +260,7 @@ def main():
             """
         )
       
-        plot_feature_importance(estimators["RandomForest"], X, y, feature_names, "RandomForest")
+        plot_feature_importance("RandomForest", estimators, X, y, feature_names)
 
 
 if __name__ == "__main__":
