@@ -5,8 +5,10 @@ pandas
 jinja2 # styling
 matplotlib
 seaborn
+plotly
 scikit-learn
 kaggle
 imbalanced-learn
 xgboost
 streamlit
+optuna
