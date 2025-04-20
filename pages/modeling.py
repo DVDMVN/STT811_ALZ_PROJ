@@ -47,8 +47,7 @@ def evaluate_model(estimator_name, X, y):
     }
     return metrics
 
-@st.cache_data()
-def get_feature_importances(model, feature_names):
+def get_feature_importances(model):
     # Tree based models usually have a feature_importances_ attribute
     if hasattr(model, "feature_importances_"):
         importances = model.feature_importances_
@@ -64,7 +63,7 @@ def get_feature_importances(model, feature_names):
         return None
 
 @st.cache_data()
-def run_feature_importance_analysis(estimators, X, y, feature_names, num_importances=5):
+def run_feature_importance_analysis(X, y, num_importances=5):
     fitted_models = {}
     for name, model in estimators.items():
         print(f"Fitting {name} ...")
@@ -72,16 +71,16 @@ def run_feature_importance_analysis(estimators, X, y, feature_names, num_importa
         fitted_models[name] = model
 
     for name, model in fitted_models.items():
-        importances = get_feature_importances(model, feature_names)
+        importances = get_feature_importances(model)
         if importances is not None:
             print(f"\n{name} feature importances:")
-            for feat, val in sorted(importances, key=lambda x: x[1], reverse=True)[:5]:
+            for feat, val in sorted(importances, key=lambda x: x[1], reverse=True)[:num_importances]:
                 print(f"\t{feat}: {val:.4f}")
         else:
             print(f"\n{name} does not provide a direct feature importance measure.")
 
 @st.cache_data()
-def plot_feature_importance(model_name, estimators, X, y, feature_names, num_importances=5):
+def plot_feature_importance(model_name, X, y, num_importances=5):
     if model_name not in estimators:
         st.warning(f"Model '{model_name}' not found.")
         return
@@ -91,7 +90,7 @@ def plot_feature_importance(model_name, estimators, X, y, feature_names, num_imp
     model.fit(X, y)
     st.success("Model training complete.")
 
-    importances = get_feature_importances(model, feature_names)
+    importances = get_feature_importances(model)
     if importances is None:
         st.warning(f"{model_name} does not provide feature importance.")
         return
@@ -107,6 +106,7 @@ def plot_feature_importance(model_name, estimators, X, y, feature_names, num_imp
     ax.set_title(f"Top {num_importances} Feature Importances: {model_name}")
     ax.set_xlabel("Importance")
     ax.set_ylabel("Feature")
+    return fig
 
 
 alzheimers, alzheimers_encoded = load_data()
@@ -128,3 +128,23 @@ for i, (name, _) in enumerate(estimators.items(), start=1):
 # --- Done! ---
 st.toast("✅ All models have been evaluated!", icon="🎉")
 st.success("Model evaluation complete.")
+
+st.subheader("Feature Selection")
+
+st.write("Exploratory analysis based on the coded dataset.")
+
+st.write(
+    """
+        Only some models have feature_importances_ or coef_, the most straightforward metrics for feature importance. 
+        We will only be doing feature importance analysis on those models that have such attributes:
+    """
+)
+run_feature_importance_analysis(X, y)
+
+st.write(
+    """
+        Find the most important features through visualization：
+    """
+)
+
+st.pyplot(plot_feature_importance("RandomForest", X, y))

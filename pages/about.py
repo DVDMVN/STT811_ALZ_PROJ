@@ -135,7 +135,8 @@ with analysis:
         (bivariate against target) we will perform two versions, one with our original imbalance, and another with data randomly undersampling the majority class:
         """
     )    
-    
+
+    @st.cache_data()
     def plot_bivariate_analysis(undersample: bool) -> plt.Figure:
         if undersample:
             rus = RandomUnderSampler(random_state = 1337)
@@ -282,23 +283,3 @@ with preprocessing:
 
     st.dataframe(alzheimers_encoded)
     
-# with tab4:
-#     st.subheader("Feature Selection")
-
-#     st.write("Exploratory analysis based on the coded dataset.")
-    
-#     st.write(
-#         """
-#             Only some models have feature_importances_ or coef_, the most straightforward metrics for feature importance. 
-#             We will only be doing feature importance analysis on those models that have such attributes:
-#         """
-#     )
-#     run_feature_importance_analysis(estimators, X, y, feature_names)
-
-#     st.write(
-#         """
-#             Find the most important features through visualization：
-#         """
-#     )
-    
-#     plot_feature_importance("RandomForest", estimators, X, y, feature_names)
