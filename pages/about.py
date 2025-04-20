@@ -1,94 +1,19 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
+import plotly.express as px
 import pandas as pd
 
 import io
 import numpy as np
-from sklearn.model_selection import StratifiedKFold
-import xgboost as xgb
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.naive_bayes import GaussianNB
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import LinearSVC
+
+from imblearn.under_sampling import RandomUnderSampler
 
 from sklearn.model_selection import cross_validate
 from util import load_data
 
 # -------------- FUNCTIONS --------------
 
-def evaluate_model(estimator, X, y, cv):
-    scoring = ["accuracy", "precision_macro", "recall_macro", "f1_macro"]
-    cv_results = cross_validate(estimator, X, y, scoring=scoring, cv=cv, n_jobs=-1)
-
-    metrics = {
-        "accuracy": np.mean(cv_results["test_accuracy"]),
-        "precision": np.mean(cv_results["test_precision_macro"]),
-        "recall": np.mean(cv_results["test_recall_macro"]),
-        "f1": np.mean(cv_results["test_f1_macro"]),
-    }
-    return metrics
-
-def get_feature_importances(model, feature_names):
-    # Tree based models usually have a feature_importances_ attribute
-    if hasattr(model, "feature_importances_"):
-        importances = model.feature_importances_
-        return list(zip(feature_names, importances))
-
-    # Linear models usually have a coef_ attribute
-    elif hasattr(model, "coef_"):
-        coef = model.coef_
-        importances = np.abs(coef[0])
-
-        return list(zip(feature_names, importances))
-    else:
-        return None
-
-def run_feature_importance_analysis(estimators, X, y, feature_names, num_importances=5):
-    fitted_models = {}
-    for name, model in estimators.items():
-        print(f"Fitting {name} ...")
-        model.fit(X, y)
-        fitted_models[name] = model
-
-    for name, model in fitted_models.items():
-        importances = get_feature_importances(model, feature_names)
-        if importances is not None:
-            print(f"\n{name} feature importances:")
-            for feat, val in sorted(importances, key=lambda x: x[1], reverse=True)[:5]:
-                print(f"\t{feat}: {val:.4f}")
-        else:
-            print(f"\n{name} does not provide a direct feature importance measure.")
-
-def plot_feature_importance(model_name, estimators, X, y, feature_names, num_importances=5):
-    if model_name not in estimators:
-        st.warning(f"Model '{model_name}' not found.")
-        return
-
-    st.write(f"Training model: {model_name}")
-    model = estimators[model_name]
-    model.fit(X, y)
-    st.success("Model training complete.")
-
-    importances = get_feature_importances(model, feature_names)
-    if importances is None:
-        st.warning(f"{model_name} does not provide feature importance.")
-        return
-
-    sorted_importances = sorted(importances, key=lambda x: x[1], reverse=True)
-    top_importances = sorted_importances[:num_importances]
-
-    labels = [t[0] for t in top_importances]
-    values = [t[1] for t in top_importances]
-
-    fig, ax = plt.subplots(figsize=(8, 5))
-    ax.barh(labels[::-1], values[::-1])  # Plot from highest to lowest
-    ax.set_title(f"Top {num_importances} Feature Importances: {model_name}")
-    ax.set_xlabel("Importance")
-    ax.set_ylabel("Feature")
-    st.pyplot(fig)
 
 # -------------- VARIABLES --------------
 
@@ -110,24 +35,10 @@ st.write(
     """    
 )
 
-# estimators = {
-#     "LogisticRegression": LogisticRegression(),
-#     "RandomForest": RandomForestClassifier(),
-#     "XGBoost": xgb.XGBClassifier(eval_metric="logloss"),
-#     "NaiveBayes": GaussianNB(),
-#     "LDA": LinearDiscriminantAnalysis(),
-#     "QDA": QuadraticDiscriminantAnalysis(),
-#     "KNN": KNeighborsClassifier(),
-#     "SVM": LinearSVC(C=1.0)
-# }
-
-# skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=1337)
-# results = {name: evaluate_model(model, X, y, skf) for name, model in estimators.items()}
-
-overview, analysis, preprocessing, feature_engineering = st.tabs(["Dataset Overview", "Preprocessing", "Analysis", "Feature Selection"])
+overview, analysis, preprocessing, feature_engineering = st.tabs(["Dataset Overview", "Analysis", "Preprocessing", "Feature Selection"])
 
 with overview:
-    st.subheader("Dataset Overview", divider = True)
+    st.header("Dataset Overview", divider = True)
 
     st.write(
         """
@@ -141,7 +52,7 @@ with overview:
         """
     )
 
-    st.write("Dataset Preview:")
+    st.subheader("Dataset Preview:")
     st.dataframe(alzheimers)
 
     st.subheader("Basic Statistics and Shape")
@@ -149,6 +60,8 @@ with overview:
     st.write(
         """
         The data is tabular, with a mixture of 24 different qualitative and quantitative features.
+        - Quantitative (4): Age, BMI, Cognitive Test Score, Education Level
+        - Qualitative (20): Physical Activity Level, Alcohol Consumption, Stress Levels, Country, Diabetes, Smoking Status, ...
         """
     )
 
@@ -160,54 +73,167 @@ with overview:
         st.write(alzheimers.select_dtypes(include = "object").describe())
     st.write(f"##### Shape: {alzheimers.shape}")
 
+    st.write(
+        """
+        From these statistics, we can see that we have a very reasonable distribution / frequency count in both our categorical and numerical features.
+        """
+    )
+
+
     st.write("Learn more about each specific feature in our documentation:")
     st.page_link("pages/documentation.py", label="Documentation", icon="📔")
 
     # TODO: Cite literature and include some references to popular ideas about factors that contribute toward Alzheimers
     st.write("Citing a lot of popular literature:" \
     "... ")
-    
+
 
 with analysis:
-    st.subheader("Analysis", divider = True)
+    st.header("Analysis", divider = True)
 
-    st.write("**Summary Statistics:**")
-    st.write("We first want to understand the structure of the dataset, including the size of the dataset, qualitative and quantitative features.")
+    st.subheader("Missingness and duplicate values analysis:")
 
-    buffer = io.StringIO()
-    alzheimers.info(buf=buffer)
-    st.text(buffer.getvalue())
+    missing = (
+        alzheimers.isna()
+        .sum()
+        .reset_index()
+        .rename(columns={'index': 'feature', 0: 'num_missing'})
+    )
+    st.code( 
+    '''
+    missing = (
+        alzheimers.isna()
+        .sum()
+        .reset_index()
+        .rename(columns={'index': 'feature', 0: 'num_missing'})
+    )
+    st.write(missing)
+    ''', language='python')
+    st.write(missing)
 
-    st.dataframe(alzheimers.describe())
+    num_duplicates = alzheimers.duplicated().sum()
+    st.code( 
+    '''
+    n_duplicates = alzheimers.duplicated().sum()
+    st.write(f"Number of duplicate values = {num_duplicates}")
+    ''', language='python')
+    st.write(f"Number of duplicate values = {num_duplicates}")
 
     st.write(
         """
-            Quantitative (4): Age, BMI, Cognitive Test Score, Education Level
+            This dataset appears to be very clean!
+            - No missing values, the row counts for each attribute remain consistent for all.
+            - No duplicate values, each row is unique.
         """
     )
 
-    st.write(
-        """
-            Qualitative (20): Physical Activity Level, Alcohol Consumption, Stress Levels, Country, Diabetes, Smoking Status, ...
-        """
-    )
+    st.subheader("Bivariate distribution analysis")
 
     st.write(
         """
-            This dataset appears to be very clean. 
-            No missing values, the row counts for each attribute remain consistent for all. 
-            Data types appear as expected.
-            Frequency counts for categorical variables show a good distribution for each.
+        From our basic statistics, we can observe that the distribution for our target variable is slightly imbalanced. To perform our bivariate distribution analysis 
+        (bivariate against target) we will perform two versions, one with our original imbalance, and another with data randomly undersampling the majority class:
         """
-    )
+    )    
     
-    st.write("**Linear correlation analysis:**")
+    def plot_bivariate_analysis(undersample: bool) -> plt.Figure:
+        if undersample:
+            rus = RandomUnderSampler(random_state = 1337)
+            alzheimers_resampled, alzheimers_resampled_class = rus.fit_resample(
+                alzheimers.drop("Alzheimer’s Diagnosis", axis=1),
+                alzheimers["Alzheimer’s Diagnosis"],
+            )
+            alzheimers_resampled = pd.concat([alzheimers_resampled, alzheimers_resampled_class], axis = 1)
+            data = alzheimers_resampled
+        else:
+            data = alzheimers
+
+        fig, axes = plt.subplots(7, 4, figsize=(16, 24))
+        axes: list[plt.Axes] = axes.ravel()
+
+        def plot_kdeplot_bivariate(x, ax: plt.Axes):
+            sns.kdeplot(
+                data = data,
+                x = x,
+                hue = 'Alzheimer’s Diagnosis',
+                ax = ax,
+                legend = False
+            )
+            ax.set_title(x)
+            ax.set_yticks([], [])
+
+        def plot_histplot_bivariate(x, ax: plt.Axes):
+            sns.histplot(
+                data = data,
+                x = x,
+                hue = 'Alzheimer’s Diagnosis',
+                ax = ax,
+                multiple = 'dodge',
+                legend = False
+            )
+            ax.set_title(x)
+            ax.set_yticks([], [])
+
+        # Numerical ones first
+        numerical_columns = list(alzheimers.select_dtypes(include = 'number').columns)
+        categorical_columns = list(alzheimers.select_dtypes(include = 'object').columns)
+
+        ax_idx = 0
+        for numerical_column in numerical_columns:
+            plot_kdeplot_bivariate(numerical_column, axes[ax_idx])
+            ax_idx += 1
+
+        for categorical_column in categorical_columns:
+            plot_histplot_bivariate(categorical_column, axes[ax_idx])
+            ax_idx += 1
+        axes[-1].remove()
+        axes[-2].remove()
+        axes[-3].remove()     
+
+        plt.tight_layout()
+        return fig
     
-    fig, ax = plt.subplots(figsize=(10, 8))
-    sns.heatmap(alzheimers.select_dtypes(include='number').corr(), ax=ax, vmin=-1, vmax=1, cmap='coolwarm', annot=True, square=True)
-    plt.xticks(rotation=45)
-    plt.yticks(rotation=0)
-    st.pyplot(fig)
+    bivariate_tab_orig, bivariate_tab_oversample = st.tabs(['Original', 'With undersampling'])
+    with bivariate_tab_orig:
+        st.write("**Using original Data (No undersampling)**")
+        st.pyplot(plot_bivariate_analysis(undersample = False))
+
+    with bivariate_tab_oversample:
+        st.write("**Using data with random undersampling of majority class**")
+        st.pyplot(plot_bivariate_analysis(undersample = True))
+
+    st.write(
+        """
+        - Frequency counts for categorical variables show a good distribution for each.
+        """
+    )
+
+    st.subheader("Correlation analysis for numerical features:")
+    
+    st.write("Linear correlation heatmap")
+
+    def plot_correlation_heatmap():
+        corr_matrix = alzheimers.select_dtypes(include='number').corr()
+        corr_matrix = np.round(corr_matrix, 2)
+
+        fig = px.imshow(
+            corr_matrix,
+            text_auto=True, 
+            color_continuous_scale='RdBu_r',
+            zmin=-1,
+            zmax=1,
+            aspect="auto"
+        )
+        
+        fig.update_layout(
+            title='Correlation heatmap',
+            width=700,
+            height=700,
+            margin=dict(l=120, r=120, t=100, b=100)
+        )
+        
+        return fig
+    st.plotly_chart(plot_correlation_heatmap())
 
     st.write(
         """
@@ -227,6 +253,7 @@ with preprocessing:
     
     st.markdown(
         """
+        Because our data appears very clean (no missing values or duplicates), we will not apply any imputation or removal of data.
 
         1. Standardization of numerical features  
             - All continuous variables will be standardized (zero mean, unit variance).
@@ -243,13 +270,13 @@ with preprocessing:
 
     st.write(
         """
-            For specific operations, please refer to the file preprocessing.py from the source library.
+        For specific operations, please refer to the file preprocessing.py from the source library.
         """
     )
 
     st.write(
         """
-            **New data set after processing:** 
+        **New data set after processing:** 
         """
     )
 
