@@ -10,3 +10,4 @@ kaggle
 imbalanced-learn
 xgboost
 streamlit
+optuna

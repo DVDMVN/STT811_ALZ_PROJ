@@ -2,37 +2,23 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
+
 import io
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
+import xgboost as xgb
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
-import xgboost as xgb
 from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import SVC
 from sklearn.svm import LinearSVC
-import time
-from functools import wraps
-from sklearn.model_selection import train_test_split, KFold
+
 from sklearn.model_selection import cross_validate
 from util import load_data
 
-def time_it():
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            start = time.perf_counter()
-            result = func(*args, **kwargs)
-            end = time.perf_counter()
-            print(f"[TIMER] {func.__name__} took {end - start:.4f} seconds")
-            return result
-        return wrapper
-    return decorator
+# -------------- FUNCTIONS --------------
 
-@time_it()
 def evaluate_model(estimator, X, y, cv):
     scoring = ["accuracy", "precision_macro", "recall_macro", "f1_macro"]
     cv_results = cross_validate(estimator, X, y, scoring=scoring, cv=cv, n_jobs=-1)
@@ -104,164 +90,188 @@ def plot_feature_importance(model_name, estimators, X, y, feature_names, num_imp
     ax.set_ylabel("Feature")
     st.pyplot(fig)
 
-def main():
-    st.title("About the Data 💾")
-    alzheimers, alzheimers_encoded = load_data()
+# -------------- VARIABLES --------------
 
-    X = alzheimers_encoded.drop(columns=["Alzheimers_Diagnosis_Yes"])
-    y = alzheimers_encoded["Alzheimers_Diagnosis_Yes"]
-    feature_names = X.columns
+alzheimers, alzheimers_encoded = load_data()
+X = alzheimers_encoded.drop(columns=["Alzheimers_Diagnosis_Yes"])
+y = alzheimers_encoded["Alzheimers_Diagnosis_Yes"]
+feature_names_orig = alzheimers.columns
+feature_names = X.columns
 
-    estimators = {
-        "LogisticRegression": LogisticRegression(),
-        "RandomForest": RandomForestClassifier(),
-        "XGBoost": xgb.XGBClassifier(eval_metric="logloss"),
-        "NaiveBayes": GaussianNB(),
-        "LDA": LinearDiscriminantAnalysis(),
-        "QDA": QuadraticDiscriminantAnalysis(),
-        "KNN": KNeighborsClassifier(),
-        "SVM": LinearSVC(C=1.0)
-    }
-    
-    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=1337)
-    results = {name: evaluate_model(model, X, y, skf) for name, model in estimators.items()}
+st.title("About the Data 💾")
+
+st.divider()
+
+st.write(
+    """
+    This page details the process for cleaning and preprocessing of the data before its usage in analysis and modeling. Ech preprocessing decision 
+    is made with ample reasoning and investigation, noting why changes were made may be useful in the assessment of our analysis. Additionally, this page will include our
+    exploratory visual analysis that may justify further some explanation and decisions.
+    """    
+)
+
+# estimators = {
+#     "LogisticRegression": LogisticRegression(),
+#     "RandomForest": RandomForestClassifier(),
+#     "XGBoost": xgb.XGBClassifier(eval_metric="logloss"),
+#     "NaiveBayes": GaussianNB(),
+#     "LDA": LinearDiscriminantAnalysis(),
+#     "QDA": QuadraticDiscriminantAnalysis(),
+#     "KNN": KNeighborsClassifier(),
+#     "SVM": LinearSVC(C=1.0)
+# }
+
+# skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=1337)
+# results = {name: evaluate_model(model, X, y, skf) for name, model in estimators.items()}
+
+overview, analysis, preprocessing, feature_engineering = st.tabs(["Dataset Overview", "Preprocessing", "Analysis", "Feature Selection"])
+
+with overview:
+    st.subheader("Dataset Overview", divider = True)
 
     st.write(
-        """ 
-            Our dataset is a collection of patient observations documenting risk factors associated with Alzheimer's disease, as well as their specific diagnosis. 
-            The data has a global perspective, coming from 20 different countries across the world, including the United States, United Kingdom, China, India, Brazil and many more, 
-            with an even spread of roughly 3700 records per country. 
-            The data was gathered and made public by a user on Kaggle. 
-            Many of the features in our dataset are frequently cited in popular scientific literature as potential links to development and progression of various dementia symptoms and Alzheimer's disease variants, 
-            making it prime for investigating relevant claims about Alzheimer's risk factors.
+        """
+        In this project, we utilize a dataset from kaggle: [Kaggle](https://www.kaggle.com/datasets/ankushpanday1/alzheimers-prediction-dataset-global)
+
+        This dataset is a collection of patient observations documenting risk factors associated with Alzheimer's disease, as well as their specific diagnosis.
+        - The data has a global perspective, coming from 20 different countries across the world, including the United States, United Kingdom, China, India, Brazil and many more, 
+        with an even spread of roughly 3700 records per country.
+        - Many of the features in our dataset are frequently cited in popular scientific literature as potential links to development and progression of various dementia symptoms and Alzheimer's disease variants, 
+        making it prime for investigating relevant claims about Alzheimer's risk factors.
         """
     )
 
-    tab1, tab2, tab3, tab4 = st.tabs(["Original Data Set", "Preprocessing", "Analysis", "Feature Selection"])
+    st.write("Dataset Preview:")
+    st.dataframe(alzheimers)
 
-    with tab1:
-        st.subheader("Original Data Set")
-      
-        st.markdown("Dataset source: [Kaggle](https://www.kaggle.com/datasets/ankushpanday1/alzheimers-prediction-dataset-global)")
+    st.subheader("Basic Statistics and Shape")
 
-        st.write("Sample Data:")
-        st.dataframe(alzheimers)
+    st.write(
+        """
+        The data is tabular, with a mixture of 24 different qualitative and quantitative features.
+        """
+    )
 
-        st.write(
-            """
-              The data is tabular, with a mixture of 24 different qualitative and quantitative features.
-            """
-        )
+    numerical_tab, categorical_tab = st.tabs(['Numerical Statistics', 'Categorical Statistics'])
+    with numerical_tab:
+        st.write(alzheimers.describe())
 
-    with tab2:
-        st.subheader("Preprocessing")
-      
-        st.markdown(
-          """
-              **Preprocessing Steps:**
-              
-              1. Standardization of numerical features  
-                 - All continuous variables will be standardized (zero mean, unit variance).
-              
-              2. Feature-appropriate encoding methods
-                 - **One-hot encoding** for **nominal variables** (no natural order).  
-                 - **Ordinal encoding** for **ordered categorical variables** (with natural order).  
-                 - **Label encoding** for **binary categorical features** (e.g., Yes/No for the target).
-              
-              3. Column name normalization
-                 - Convert column names to lowercase, replace spaces with underscores, and removed apostraphes.
-          """
-        )
+    with categorical_tab:
+        st.write(alzheimers.select_dtypes(include = "object").describe())
+    st.write(f"##### Shape: {alzheimers.shape}")
 
-        st.write(
-            """
-                For specific operations, please refer to the file preprocessing.py from the source library.
-            """
-        )
+    st.write("Learn more about each specific feature in our documentation:")
+    st.page_link("pages/documentation.py", label="Documentation", icon="📔")
 
-        st.write(
-            """
-                **New data set after processing:** 
-            """
-        )
-
-        st.dataframe(alzheimers_encoded)
+    # TODO: Cite literature and include some references to popular ideas about factors that contribute toward Alzheimers
+    st.write("Citing a lot of popular literature:" \
+    "... ")
     
-    with tab3:
-        st.subheader("Analysis")
 
-        st.write("**Summary Statistics:**")
-        st.write("We first want to understand the structure of the dataset, including the size of the dataset, qualitative and quantitative features.")
+with analysis:
+    st.subheader("Analysis", divider = True)
 
-        buffer = io.StringIO()
-        alzheimers.info(buf=buffer)
-        st.text(buffer.getvalue())
+    st.write("**Summary Statistics:**")
+    st.write("We first want to understand the structure of the dataset, including the size of the dataset, qualitative and quantitative features.")
 
-        st.dataframe(alzheimers.describe())
+    buffer = io.StringIO()
+    alzheimers.info(buf=buffer)
+    st.text(buffer.getvalue())
 
-        st.write(
-            """
-                Quantitative (4): Age, BMI, Cognitive Test Score, Education Level
-            """
-        )
+    st.dataframe(alzheimers.describe())
 
-        st.write(
-            """
-                Qualitative (20): Physical Activity Level, Alcohol Consumption, Stress Levels, Country, Diabetes, Smoking Status, ...
-            """
-        )
+    st.write(
+        """
+            Quantitative (4): Age, BMI, Cognitive Test Score, Education Level
+        """
+    )
 
-        st.write(
-            """
-                This dataset appears to be very clean. 
-                No missing values, the row counts for each attribute remain consistent for all. 
-                Data types appear as expected.
-                Frequency counts for categorical variables show a good distribution for each.
-            """
-        )
-      
-        st.write("**Linear correlation analysis:**")
-      
-        fig, ax = plt.subplots(figsize=(10, 8))
-        sns.heatmap(alzheimers.select_dtypes(include='number').corr(), ax=ax, vmin=-1, vmax=1, cmap='coolwarm', annot=True, square=True)
-        plt.xticks(rotation=45)
-        plt.yticks(rotation=0)
-        st.pyplot(fig)
+    st.write(
+        """
+            Qualitative (20): Physical Activity Level, Alcohol Consumption, Stress Levels, Country, Diabetes, Smoking Status, ...
+        """
+    )
 
-        st.write(
-            """
-              The heatmap shows that most features have no or only limited direct linear correlation with diagnosis.
-            """
-        )
+    st.write(
+        """
+            This dataset appears to be very clean. 
+            No missing values, the row counts for each attribute remain consistent for all. 
+            Data types appear as expected.
+            Frequency counts for categorical variables show a good distribution for each.
+        """
+    )
+    
+    st.write("**Linear correlation analysis:**")
+    
+    fig, ax = plt.subplots(figsize=(10, 8))
+    sns.heatmap(alzheimers.select_dtypes(include='number').corr(), ax=ax, vmin=-1, vmax=1, cmap='coolwarm', annot=True, square=True)
+    plt.xticks(rotation=45)
+    plt.yticks(rotation=0)
+    st.pyplot(fig)
 
-        st.write(
-            """
-              We would like to refer to categorical features to explore more influencing factors of Alzheimer's disease. 
-              We will find the most valuable features and perform feature selection in subsequent analysis.
-            """
-        )
-      
-    with tab4:
-        st.subheader("Feature Selection")
+    st.write(
+        """
+            The heatmap shows that most features have no or only limited direct linear correlation with diagnosis.
+        """
+    )
 
-        st.write("Exploratory analysis based on the coded dataset.")
-      
-        st.write(
-            """
-              Only some models have feature_importances_ or coef_, the most straightforward metrics for feature importance. 
-              We will only be doing feature importance analysis on those models that have such attributes:
-            """
-        )
-        run_feature_importance_analysis(estimators, X, y, feature_names)
+    st.write(
+        """
+            We would like to refer to categorical features to explore more influencing factors of Alzheimer's disease. 
+            We will find the most valuable features and perform feature selection in subsequent analysis.
+        """
+    )
 
-        st.write(
-            """
-              Find the most important features through visualization：
-            """
-        )
-      
-        plot_feature_importance("RandomForest", estimators, X, y, feature_names)
+with preprocessing:
+    st.subheader("Preprocessing")
+    
+    st.markdown(
+        """
 
+        1. Standardization of numerical features  
+            - All continuous variables will be standardized (zero mean, unit variance).
+        
+        2. Feature-appropriate encoding methods
+            - **One-hot encoding** for **nominal variables** (no natural order).  
+            - **Ordinal encoding** for **ordered categorical variables** (with natural order).  
+            - **Label encoding** for **binary categorical features** (e.g., Yes/No for the target).
+        
+        3. Column name normalization
+            - Convert column names to lowercase, replace spaces with underscores, and removed apostraphes.
+        """
+    )
 
-if __name__ == "__main__":
-    main()
+    st.write(
+        """
+            For specific operations, please refer to the file preprocessing.py from the source library.
+        """
+    )
+
+    st.write(
+        """
+            **New data set after processing:** 
+        """
+    )
+
+    st.dataframe(alzheimers_encoded)
+    
+# with tab4:
+#     st.subheader("Feature Selection")
+
+#     st.write("Exploratory analysis based on the coded dataset.")
+    
+#     st.write(
+#         """
+#             Only some models have feature_importances_ or coef_, the most straightforward metrics for feature importance. 
+#             We will only be doing feature importance analysis on those models that have such attributes:
+#         """
+#     )
+#     run_feature_importance_analysis(estimators, X, y, feature_names)
+
+#     st.write(
+#         """
+#             Find the most important features through visualization：
+#         """
+#     )
+    
+#     plot_feature_importance("RandomForest", estimators, X, y, feature_names)
