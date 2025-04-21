@@ -11,7 +11,7 @@ def horizontal(dfs):
     html += "</div>"
     display(HTML(html))
 
-@st.cache_data
+@st.cache_data()
 def load_data():
     DATA_URL_1 = ('data/alzheimers.csv')
     DATA_URL_2 = ('data/alzheimers_encoded.csv')
