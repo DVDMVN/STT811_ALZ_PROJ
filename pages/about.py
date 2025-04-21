@@ -18,6 +18,7 @@ from util import load_data
 # -------------- VARIABLES --------------
 
 alzheimers, alzheimers_encoded = load_data()
+alzheimers['Country'] = alzheimers['Country'].apply(lambda x: str(x))
 X = alzheimers_encoded.drop(columns=["Alzheimers_Diagnosis_Yes"])
 y = alzheimers_encoded["Alzheimers_Diagnosis_Yes"]
 feature_names_orig = alzheimers.columns
@@ -67,10 +68,10 @@ with overview:
 
     numerical_tab, categorical_tab = st.tabs(['Numerical Statistics', 'Categorical Statistics'])
     with numerical_tab:
-        st.write(alzheimers.describe())
+        st.dataframe(alzheimers.describe())
 
     with categorical_tab:
-        st.write(alzheimers.select_dtypes(include = "object").describe())
+        st.dataframe(alzheimers.select_dtypes(include="object").describe().astype(str))
     st.write(f"##### Shape: {alzheimers.shape}")
 
     st.write(
@@ -213,6 +214,7 @@ with analysis:
     
     st.write("Linear correlation heatmap")
 
+    @st.cache_data()
     def plot_correlation_heatmap():
         corr_matrix = alzheimers.select_dtypes(include='number').corr()
         corr_matrix = np.round(corr_matrix, 2)
