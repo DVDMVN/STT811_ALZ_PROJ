@@ -35,7 +35,7 @@ st.write(
     """    
 )
 
-overview, analysis, preprocessing, feature_engineering = st.tabs(["Dataset Overview", "Analysis", "Preprocessing", "Feature Selection"])
+overview, analysis, preprocessing= st.tabs(["Dataset Overview", "Analysis", "Preprocessing"])
 
 with overview:
     st.header("Dataset Overview", divider = True)
