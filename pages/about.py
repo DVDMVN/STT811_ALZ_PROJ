@@ -54,7 +54,7 @@ with overview:
     )
 
     st.subheader("Dataset Preview:")
-    st.dataframe(alzheimers)
+    st.dataframe(alzheimers.head(10))
 
     st.subheader("Basic Statistics and Shape")
 
@@ -278,5 +278,5 @@ with preprocessing:
         """
     )
 
-    st.dataframe(alzheimers_encoded)
-    
+    st.dataframe(alzheimers_encoded.head(10))
+    st.write(f"##### Shape: {alzheimers_encoded.shape}")

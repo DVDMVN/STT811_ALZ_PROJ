@@ -129,10 +129,9 @@ def plot_feature_importance(model_name, X, y, num_importances=5):
         st.warning(f"Model '{model_name}' not found.")
         return
 
-    st.write(f"Training model: {model_name}")
     model = estimators[model_name]
     model.fit(X, y)
-    st.success("Model training complete.")
+    st.success(f"✅ Model '{model_name}' finished fitting!")
 
     importances = get_feature_importances(model)
     if importances is None:
@@ -239,7 +238,7 @@ results = {}
 
 # --- Model evaluation loop ---
 for i, (name, _) in enumerate(estimators.items(), start=1):
-    with st.spinner(f"Training {name}..."):
+    with st.spinner(f"Training and testing {name}..."):
         results[name] = evaluate_model(name, X, y)
         progress_bar.progress(
             i / len(estimators), text=f"Completed {i}/{len(estimators)} models"
@@ -247,7 +246,7 @@ for i, (name, _) in enumerate(estimators.items(), start=1):
 
 # --- Done! ---
 st.toast("✅ All models have been evaluated!", icon="🎉")
-st.success("Model evaluation complete.")
+st.success("✅ Model evaluation complete.")
 
 st.subheader("Model Metrics", divider=True)
 
@@ -331,16 +330,25 @@ st.write(
 logreg_tab, randf_tab, xgb_tab, lda_tab, svm_tab = st.tabs(["LogisticRegression", "RandomForest", "XGBoost", "LDA", "SVM"])
 
 with logreg_tab:
-    logreg_num_importances = st.slider(label = "Number of importances:", min_value = 5, max_value = 20, value = 5)
-    st.plotly_chart(plot_feature_importance("LogisticRegression", X, y, logreg_num_importances))
+    logreg_num_importances = st.slider(label = "Number of importances:", min_value = 5, max_value = 20, value = 5, key = "logreg")
+    with st.spinner(f"Training model: {"Logistic Regression"}"):
+        st.plotly_chart(plot_feature_importance("LogisticRegression", X, y, logreg_num_importances))
 with randf_tab:
-    st.plotly_chart(plot_feature_importance("RandomForest", X, y))
+    randf_num_importances = st.slider(label = "Number of importances:", min_value = 5, max_value = 20, value = 5, key = "randf")
+    with st.spinner(f"Fitting model: {"Random Forest"}"):
+        st.plotly_chart(plot_feature_importance("RandomForest", X, y, randf_num_importances))
 with xgb_tab:
-    st.plotly_chart(plot_feature_importance("XGBoost", X, y))
+    xgb_num_importances = st.slider(label = "Number of importances:", min_value = 5, max_value = 20, value = 5, key = "xgb")
+    with st.spinner(f"Fitting model: {"XGBoost"}"):
+        st.plotly_chart(plot_feature_importance("XGBoost", X, y, xgb_num_importances))
 with lda_tab:
-    st.plotly_chart(plot_feature_importance("LDA", X, y))
+    lda_num_importances = st.slider(label = "Number of importances:", min_value = 5, max_value = 20, value = 5, key = "lda")
+    with st.spinner(f"Fitting model: {"LDA"}"):
+        st.plotly_chart(plot_feature_importance("LDA", X, y, lda_num_importances))
 with svm_tab:
-    st.plotly_chart(plot_feature_importance("SVM", X, y))
+    svm_num_importances = st.slider(label = "Number of importances:", min_value = 5, max_value = 20, value = 5, key = "svm")
+    with st.spinner(f"Fitting model: {"SVM"}"):
+        st.plotly_chart(plot_feature_importance("SVM", X, y, svm_num_importances))
 
 st.write(
     """
