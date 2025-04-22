@@ -30,7 +30,7 @@ st.divider()
 
 st.write(
     """
-    This page details the process for cleaning and preprocessing of the data before its usage in analysis and modeling. Ech preprocessing decision 
+    This page details the process for cleaning and preprocessing of the data before its usage in analysis and modeling. Each preprocessing decision 
     is made with ample reasoning and investigation, noting why changes were made may be useful in the assessment of our analysis. Additionally, this page will include our
     exploratory visual analysis that may justify further some explanation and decisions.
     """    
@@ -54,7 +54,7 @@ with overview:
     )
 
     st.subheader("Dataset Preview:")
-    st.dataframe(alzheimers)
+    st.dataframe(alzheimers.head(10))
 
     st.subheader("Basic Statistics and Shape")
 
@@ -83,11 +83,6 @@ with overview:
 
     st.write("Learn more about each specific feature in our documentation:")
     st.page_link("pages/documentation.py", label="Documentation", icon="📔")
-
-    # TODO: Cite literature and include some references to popular ideas about factors that contribute toward Alzheimers
-    st.write("Citing a lot of popular literature:" \
-    "... ")
-
 
 with analysis:
     st.header("Analysis", divider = True)
@@ -283,5 +278,5 @@ with preprocessing:
         """
     )
 
-    st.dataframe(alzheimers_encoded)
-    
+    st.dataframe(alzheimers_encoded.head(10))
+    st.write(f"##### Shape: {alzheimers_encoded.shape}")
