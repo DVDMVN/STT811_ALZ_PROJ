@@ -315,11 +315,10 @@ st.write("Exploratory analysis based on the coded dataset.")
 
 st.write(
     """
-        Only some models have feature_importances_ or coef_, the most straightforward metrics for feature importance. 
-        We will only be doing feature importance analysis on those models that have such attributes:
+    Only some models have feature_importances_ or coef_, the most straightforward metrics for feature importance. 
+    We will only be doing feature importance analysis on those models that have such attributes:
     """
 )
-# run_feature_importance_analysis(X, y)
 
 st.write(
     """
@@ -364,4 +363,39 @@ st.write(
     """
 )
 
-st.header("Conclusion", divider=True)
+st.subheader("Correlation Analysis")
+
+st.write(
+    """
+    TODO:
+    """
+)
+
+st.subheader("Modeling with Interaction Features")
+
+st.write(
+    """
+    Due to limitations with memory, modeling with such an extreme number of features is too expensive for most models. For this reason, we will only be modeling
+    with interaction features as predictors for a select few models that run in a reasonable amount of time.
+    """
+)
+
+st.write(
+    """
+    """
+)
+
+st.subheader("Importances of Original Features vs Interaction Features")
+
+st.write(
+    """
+    """
+)
+
+st.header("Conclusions", divider=True)
+
+st.write(
+    """
+    HERE SOME CONCLUSIONS
+    """
+)
