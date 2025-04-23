@@ -185,24 +185,29 @@ st.write(
 
 st.header("Benchmark Model", divider=True)
 
-benchmark_age = 40
+benchmark_age = alzheimers['Age'].mean()
 
 st.write(
-    """
-    As a trivial benchmark to compare against, we postulate a model that simply chooses patients above age {benchmark_age} to have Alzheimers.
+    f"""
+    As a trivial benchmark to compare against, we postulate a model that simply chooses patients above the mean age (mean = {benchmark_age:.2f}) to have Alzheimers.
     """
 )
 
-st.write(
-    """
-    SHOW BENCHMARK MODEL
-    """
-)
+st.code(
+    '''
+    predictions = alzheimers_encoded['Age'] > 0
+    (predictions.values == alzheimers_encoded['Alzheimers_Diagnosis_Yes']).sum() / alzheimers_encoded.__len__()
+    '''
+, language='python')
+
+benchmark_predictions = alzheimers_encoded['Age'] > 0
+benchmark_accuracy = (benchmark_predictions.values == alzheimers_encoded['Alzheimers_Diagnosis_Yes']).sum() / alzheimers_encoded.__len__()
 
 st.write(
-    """
-    Such a model already gives an accuracy of {}!
+    f"""
+    Such a model already gives an accuracy of {benchmark_accuracy * 100:.2f}%!
     - This benchmark serves to...
+    - TODO: WRITE ABOUT BENCHMARK CONTEXT
     """
 )
 
