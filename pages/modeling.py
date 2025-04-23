@@ -72,7 +72,8 @@ def get_feature_importances(model):
         return list(zip(feature_names, importances))
     else:
         return None
-    
+
+
 # @st.cache_data()
 # def run_feature_importance_analysis(X, y, num_importances=5):
 #     fitted_models = {}
@@ -147,9 +148,9 @@ def plot_feature_importance(model_name, X, y, num_importances=5):
     fig = px.bar(
         x=values[::-1],
         y=labels[::-1],
-        orientation='h',
-        labels={'x': 'Importance', 'y': 'Feature'},
-        title=f"Top {num_importances} Feature Importances: {model_name}"
+        orientation="h",
+        labels={"x": "Importance", "y": "Feature"},
+        title=f"Top {num_importances} Feature Importances: {model_name}",
     )
     # fig.update_layout(
     #     yaxis=dict(tickfont=dict(size=12)),
@@ -157,7 +158,6 @@ def plot_feature_importance(model_name, X, y, num_importances=5):
     #     margin=dict(l=100, r=20, t=50, b=50)
     # )
     return fig
-
 
 
 # -------------- VARIABLES --------------
@@ -263,11 +263,9 @@ average_metrics = {
     metric_name: total / len(results) for metric_name, total in metric_totals.items()
 }
 
-ranking_metric = "f1"          # <- change to "accuracy", "precision", etc. if desired
+ranking_metric = "f1"  # <- change to "accuracy", "precision", etc. if desired
 sorted_models = sorted(
-    results.items(),
-    key=lambda item: item[1][ranking_metric],
-    reverse=True
+    results.items(), key=lambda item: item[1][ranking_metric], reverse=True
 )
 
 medal_emojis = ["🥇", "🥈", "🥉"]
@@ -278,7 +276,7 @@ medals = {
 
 for name, metrics_dict in results.items():
     label = f"{medals.get(name, '')} {name}".strip()
-    
+
     model_col, accuracy_col, precision_col, recall_col, f1_col = st.columns(5)
     model_col.write(label)
     accuracy_col.metric(
@@ -326,27 +324,43 @@ st.write(
     """
 )
 
-logreg_tab, randf_tab, xgb_tab, lda_tab, svm_tab = st.tabs(["LogisticRegression", "RandomForest", "XGBoost", "LDA", "SVM"])
+logreg_tab, randf_tab, xgb_tab, lda_tab, svm_tab = st.tabs(
+    ["LogisticRegression", "RandomForest", "XGBoost", "LDA", "SVM"]
+)
 
 with logreg_tab:
-    logreg_num_importances = st.slider(label = "Number of importances:", min_value = 5, max_value = 20, value = 5, key = "logreg")
-    with st.spinner(f"Training model: {"Logistic Regression"}"):
-        st.plotly_chart(plot_feature_importance("LogisticRegression", X, y, logreg_num_importances))
+    logreg_num_importances = st.slider(
+        label="Number of importances:", min_value=5, max_value=20, value=5, key="logreg"
+    )
+    with st.spinner(f"Training model: {'Logistic Regression'}"):
+        st.plotly_chart(
+            plot_feature_importance("LogisticRegression", X, y, logreg_num_importances)
+        )
 with randf_tab:
-    randf_num_importances = st.slider(label = "Number of importances:", min_value = 5, max_value = 20, value = 5, key = "randf")
-    with st.spinner(f"Fitting model: {"Random Forest"}"):
-        st.plotly_chart(plot_feature_importance("RandomForest", X, y, randf_num_importances))
+    randf_num_importances = st.slider(
+        label="Number of importances:", min_value=5, max_value=20, value=5, key="randf"
+    )
+    with st.spinner(f"Fitting model: {'Random Forest'}"):
+        st.plotly_chart(
+            plot_feature_importance("RandomForest", X, y, randf_num_importances)
+        )
 with xgb_tab:
-    xgb_num_importances = st.slider(label = "Number of importances:", min_value = 5, max_value = 20, value = 5, key = "xgb")
-    with st.spinner(f"Fitting model: {"XGBoost"}"):
+    xgb_num_importances = st.slider(
+        label="Number of importances:", min_value=5, max_value=20, value=5, key="xgb"
+    )
+    with st.spinner(f"Fitting model: {'XGBoost'}"):
         st.plotly_chart(plot_feature_importance("XGBoost", X, y, xgb_num_importances))
 with lda_tab:
-    lda_num_importances = st.slider(label = "Number of importances:", min_value = 5, max_value = 20, value = 5, key = "lda")
-    with st.spinner(f"Fitting model: {"LDA"}"):
+    lda_num_importances = st.slider(
+        label="Number of importances:", min_value=5, max_value=20, value=5, key="lda"
+    )
+    with st.spinner(f"Fitting model: {'LDA'}"):
         st.plotly_chart(plot_feature_importance("LDA", X, y, lda_num_importances))
 with svm_tab:
-    svm_num_importances = st.slider(label = "Number of importances:", min_value = 5, max_value = 20, value = 5, key = "svm")
-    with st.spinner(f"Fitting model: {"SVM"}"):
+    svm_num_importances = st.slider(
+        label="Number of importances:", min_value=5, max_value=20, value=5, key="svm"
+    )
+    with st.spinner(f"Fitting model: {'SVM'}"):
         st.plotly_chart(plot_feature_importance("SVM", X, y, svm_num_importances))
 
 st.write(
