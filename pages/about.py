@@ -125,12 +125,20 @@ with analysis:
 
     st.subheader("Bivariate distribution analysis")
 
+    distribution_proportion_of_target_yes = alzheimers_encoded['Alzheimers_Diagnosis_Yes'].mean()
+    distribution_proportion_of_target_no = 1 - distribution_proportion_of_target_yes
+
     st.write(
+        f"""
+        From our basic statistics, we can observe that the distribution for our target feature is slightly imbalanced. Without balancing:
+        - Proportion of positive diagnosis = {distribution_proportion_of_target_yes * 100:.2f}%
+        - Proportion of negative diagnosis = {distribution_proportion_of_target_no * 100:.2f}%
+        
+        To perform our bivariate distribution analysis (bivariate against target) we will perform two versions, one with our original imbalance, and another with data randomly undersampling the majority class:
+        - The sample distribution diagnosis proportions are wildly different from common figures on the population distribution. Plotting both the original and the imbalance assists us in both investigating this
+         discrepancy, as well as investigating a more truthful bivariance of our features against the target.
         """
-        From our basic statistics, we can observe that the distribution for our target variable is slightly imbalanced. To perform our bivariate distribution analysis 
-        (bivariate against target) we will perform two versions, one with our original imbalance, and another with data randomly undersampling the majority class:
-        """
-    )    
+    )
 
     @st.cache_data()
     def plot_bivariate_analysis(undersample: bool) -> plt.Figure:
@@ -201,17 +209,26 @@ with analysis:
 
     st.write(
         """
-        - Frequency counts for categorical variables show a good distribution for each.
+        - Frequency counts for categorical features show a good distribution for each.
         """
     )
 
     st.subheader("Correlation analysis for numerical features:")
     
-    st.write("Linear correlation heatmap")
+    st.write("Linear correlation heatmaps")
 
     @st.cache_data()
-    def plot_correlation_heatmap():
-        corr_matrix = alzheimers.select_dtypes(include='number').corr()
+    def plot_correlation_heatmap(encoded = False):
+        if encoded:
+            corr_matrix = alzheimers_encoded.corr()
+        else:
+            alz_copy = alzheimers.copy()
+            alz_copy["Alzheimer's Diagnosis"] = alzheimers['Alzheimer’s Diagnosis'].replace({
+                'No': 0,
+                'Yes': 1,
+            })
+            
+            corr_matrix = alz_copy.select_dtypes(include = 'number').corr()
         corr_matrix = np.round(corr_matrix, 2)
 
         fig = px.imshow(
@@ -231,20 +248,57 @@ with analysis:
         )
         
         return fig
-    st.plotly_chart(plot_correlation_heatmap())
+    original_corr_tab, encoded_corr_tab = st.tabs(["Original", "After Encoding"])
+    with original_corr_tab:
+        st.plotly_chart(plot_correlation_heatmap(encoded = False))
+    with encoded_corr_tab:
+        st.plotly_chart(plot_correlation_heatmap(encoded = True))
 
     st.write(
         """
-            The heatmap shows that most features have no or only limited direct linear correlation with diagnosis.
+            We plot two correlation heatmaps, one on the original data and one with the encoded data after preprocessing.
+
+            The heatmaps shows that all features seem to have little to no correlation with one another, and furthermore most do not seem to have any correlation with diagnosis.
+            - The only notable correlations are with our target and the features age, family history, and genetic risk factor.
         """
     )
 
     st.write(
         """
-            We would like to refer to categorical features to explore more influencing factors of Alzheimer's disease. 
-            We will find the most valuable features and perform feature selection in subsequent analysis.
+        We would like to refer to categorical features to explore more influencing factors of Alzheimer's disease. 
+        We find the most valuable features during machine learning through feature importances, contained within our modeling page.
         """
     )
+
+    # @st.cache_data()
+    # def plot_age_distribution_violin_plot():
+    #     plot_data = alzheimers.copy()
+    #     plot_data["Diagnosis_Label"] = plot_data["Alzheimer’s Diagnosis"].replace({
+    #         'No': "negative diagnosis",
+    #         'Yes': "positive diagnosis"
+    #     })
+
+    #     fig = px.violin(
+    #         plot_data,
+    #         x="Diagnosis_Label",
+    #         y="Age",
+    #         box=True,
+    #         color="Diagnosis_Label",
+    #         category_orders={"Diagnosis_Label": ["Negative Diagnosis", "Positive Diagnosis"]},
+    #         title="Age Distribution by Alzheimer's Diagnosis"
+    #     )
+
+    #     fig.update_layout(
+    #         xaxis_title="Alzheimer's Diagnosis",
+    #         yaxis_title="Age",
+    #         violingap=0.3,
+    #         violingroupgap=0.1,
+    #         violinmode='overlay'
+    #     )
+    #     return fig
+
+    # st.plotly_chart(plot_age_distribution_violin_plot())
+
 
 with preprocessing:
     st.subheader("Preprocessing")
@@ -254,27 +308,29 @@ with preprocessing:
         Because our data appears very clean (no missing values or duplicates), we will not apply any imputation or removal of data.
 
         1. Standardization of numerical features  
-            - All continuous variables will be standardized (zero mean, unit variance).
+            - All continuous features will be standardized (zero mean, unit variance).
         
         2. Feature-appropriate encoding methods
-            - **One-hot encoding** for **nominal variables** (no natural order).  
-            - **Ordinal encoding** for **ordered categorical variables** (with natural order).  
-            - **Label encoding** for **binary categorical features** (e.g., Yes/No for the target).
+            - One-hot encoding for nominal features (no natural order).  
+            - Ordinal encoding for ordered categorical features (with natural order).  
+            - Label encoding for binary categorical features (e.g., Yes/No for the target).
         
         3. Column name normalization
-            - Convert column names to lowercase, replace spaces with underscores, and removed apostraphes.
+            - Convert column names to lowercase.
+            - Replace whitespace with underscores.
+            - Remove apostraphes.
         """
     )
 
     st.write(
         """
-        For specific operations, please refer to the file preprocessing.py from the source library.
+        For specific operations, and our breakdown of feature types, please refer to the file preprocessing.py from the source library.
         """
     )
 
     st.write(
         """
-        **New data set after processing:** 
+        **Data set preview after preprocessing:** 
         """
     )
 

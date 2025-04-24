@@ -27,7 +27,7 @@ st.write(
     
     Based on the AA (Alzheimer's Association) 2024 annual review [Link](https://www.alz.org/getmedia/76e51bb6-c003-4d84-8019-e0779d8c4e8d/alzheimers-facts-and-figures.pdf):
     - Alzheimer's is the most common cause of dementia, accounting for an estimated 60 - 80% of cases.
-    - About 1 in 9 people (10.9%) age 65 and older has Alzheimer's dementia.
+    - About 1 in 9 people (10.9%) age 65 and older in the U.S. has Alzheimer's dementia.
     """
 )
 

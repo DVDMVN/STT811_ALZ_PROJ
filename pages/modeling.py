@@ -146,8 +146,8 @@ def plot_feature_importance(model_name, X, y, num_importances=5):
     values = [t[1] for t in top_importances]
 
     fig = px.bar(
-        x=values[::-1],
-        y=labels[::-1],
+        x=values,
+        y=labels,
         orientation="h",
         labels={"x": "Importance", "y": "Feature"},
         title=f"Top {num_importances} Feature Importances: {model_name}",
@@ -176,10 +176,15 @@ st.divider()
 
 st.write(
     """
-    TODO:
-    Our goal is two-fold, 
-    - Finding precise models for true Alzheimer's detection
-    - Understanding underlying importances used by the models
+    This page details the modeling approaches used to analyze Alzheimer's disease prediction factors. Provided are a demonstration of evaluation of multiple machine learning algorithms, feature / interaction feature importance analysis.
+    """
+)
+
+st.write(
+    """
+    Reiterating our goals:
+    - Evaluating the effectiveness of machine learning models in accurately diagnosing Alzheimer's disease based on tabular data (non-image data).
+    - Identifying and quantify the most significant risk factors to inform intervention, prevention, and diagnostic strategies.
     """
 )
 
@@ -195,8 +200,8 @@ st.write(
 
 st.code(
     '''
-    predictions = alzheimers_encoded['Age'] > 0
-    (predictions.values == alzheimers_encoded['Alzheimers_Diagnosis_Yes']).sum() / alzheimers_encoded.__len__()
+    predictions = alzheimers['Age'] > alzheimers['Age'].mean()
+    benchmark_accuracy = (predictions.values == alzheimers['Alzheimers_Diagnosis_Yes']).sum() / alzheimers.__len__()
     '''
 , language='python')
 
@@ -206,13 +211,18 @@ benchmark_accuracy = (benchmark_predictions.values == alzheimers_encoded['Alzhei
 st.write(
     f"""
     Such a model already gives an accuracy of {benchmark_accuracy * 100:.2f}%!
-    
-    - This benchmark serves to establish a simple and intuitive baselineto compare with more complex machine learning models. 
-    We predict a diagnosis of Alzheimer's disease based solely on whether the patient's age is above the population mean (71.96).
-    It does not require any additional information other than testing for age, a well-known risk factor. 
-    Although this test is simple, our baseline achieved a good accuracy. 
-    This suggests that there is a strong association between age and Alzheimer's disease prevalence. 
-    We use this result as a reference point to evaluate whether machine learning models are able to incorporate richer feature sets and capture more complex patterns.
+
+    - Important note: True distribution of Alzheimer's for the population is not so uniformly distributed as our dataset, this accuracy does not truly represent
+    population distribution.
+        - For reference, the true metric is closer to about 1 in 9 people age 65 or older [Link](https://www.alz.org/getmedia/76e51bb6-c003-4d84-8019-e0779d8c4e8d/alzheimers-facts-and-figures.pdf)
+    """
+)
+
+st.write(
+    """
+    - The relatively good performance of this model highlights a strong association between age and Alzheimer's disease prevalence, which is very commonly referenced in research as the best predictor [Link](https://www.alz.org/getmedia/dbc8fd3f-a1a8-4cfd-8c40-acb89fd65b23/annual-report-2024.pdf).
+    - As this benchmark does not require any additional information other than testing for age, we use this result as a reference point to evaluate whether machine learning models 
+    are able to incorporate richer feature sets and capture more complex patterns.
     """
 )
 
@@ -236,8 +246,7 @@ st.write(
     - 1: positive diagnosis for Alzheimer’s
 
     We used our set of full encoded and standardized features for our predictors:
-    - TODO
-    - TODO
+    - Though from our bivariate analysis in our about page,
     """
 )
 
@@ -389,7 +398,15 @@ with svm_tab:
 
 st.write(
     """
-    TODO:
+    Key observations:
+    - Age and genetic risk factor seem to be consistently the strongest signals, appearing at or near the top in every model that reports importances.
+    - Family history of dementia seems to be the next-most influential variable.
+
+    Some country of residence dummies climb the ranking in tree-based models, but their contributions are small. We suspect that this may be reflective of sample bias rather than genuine epidemiological differences, 
+    though this area of Alzheimer's risk factor studies is one not very well researched [Link](https://www.alz.org/getmedia/76e51bb6-c003-4d84-8019-e0779d8c4e8d/alzheimers-facts-and-figures.pdf).
+    
+    With this dataset, we are able to reproduce the most well known narrative regarding Alzheimer's risk association with age and other herditary factors, but we fail to reproduce supplementary, well tested, results regarding
+      lifestyle variables such as smoking, obesity, and depression [Link](https://jamanetwork.com/journals/jamapsychiatry/fullarticle/2272732#google_vignette)
     """
 )
 
@@ -397,30 +414,110 @@ st.header("Interaction Feature Analysis", divider=True)
 
 st.write(
     """
-    TODO:
+    In efforts to clarify why our results seem to only line up with the most popular narratives in age and hereditary factors, we additionally performed interaction feature analysis, hoping to uncover whether
+    certain features, such as BMI or smoker status, may have significant predictive power in conjunction with one another. The interaction features we test are simple second degree cross multiples.
     """
 )
 
-st.subheader("Correlation Analysis")
+st.caption(
+    """
+    (Due to limitations with memory and slow execution speed, modeling with such an extreme number of features is expensive. Our results have been prebaked and saved for the interaction feature analysis. Check the `master_notebook.ipynb` file
+    for a full breakdown.)
+    """
+)
+
+st.subheader("Interaction Correlation Analysis")
 
 st.write(
     """
-    TODO:
+    A simple linear correlation analysis to qualify modeling which learns best from linear relation.
+    """
+)
+
+st.caption("Values are Pearson coefficients - some NaN values come from the sparsity of the original encoded matrix causing divide by 0 errors in correlation calculation.")
+
+interaction_correlation = pd.read_csv('cache/interaction_correlation.csv')
+st.dataframe(interaction_correlation)
+
+st.write(
+    """
+    We observe that the original features, without cross interaction, seem to retain highest correlation with the target feature.
+    - While we hypothesized that feature interactions might reveal hidden patterns in Alzheimer's risk factors, our analysis shows that the primary individual features maintain their 
+    dominance in linear correlation even after introducing interaction terms.
+    - Specifically, Age, Genetic Risk Factor (APOE-ε4 allele), and Family History of Alzheimer's still emerge as top correlators, with their individual importance coefficients 
+    significantly higher than any interaction terms.
+    - Geographic variables seem to come up fourth after the main three, but their predictive power was substantially lowe. Again, we hypothesize that this represents demographic sampling variations rather than 
+    true geographic effects on disease prevalence.
+
+    The absence of strong interaction effects suggests that these primary risk factors operate largely independently rather than synergistically in predicting Alzheimer's diagnosis.
     """
 )
 
 st.subheader("Modeling with Interaction Features")
 
-st.write(
-    """
-    Due to limitations with memory, modeling with such an extreme number of features is too expensive for most models. For this reason, we will only be modeling
-    with interaction features as predictors for a select few models that run in a reasonable amount of time.
-    """
+interaction_feature_results_df = pd.read_csv('cache/model_metrics.csv')
+interaction_feature_results = (
+    interaction_feature_results_df.set_index("Model")
+      .astype(np.float64)
+      .to_dict(orient="index")
 )
 
+interaction_metric_totals = defaultdict(float)
+
+for metrics in interaction_feature_results.values():
+    for metric_name, value in metrics.items():
+        if metric_totals[metric_name]:
+            metric_totals[metric_name] += value
+        else:
+            metric_totals[metric_name] = value
+
+average_interaction_metrics = {
+    metric_name: total / len(results) for metric_name, total in metric_totals.items()
+}
+
+ranking_metric = "f1"  # <- change to "accuracy", "precision", etc. if desired
+sorted_interaction_models = sorted(
+    results.items(), key=lambda item: item[1][ranking_metric], reverse=True
+)
+
+medal_emojis = ["🥇", "🥈", "🥉"]
+interaction_medals = {
+    name: medal
+    for medal, (name, _) in zip(medal_emojis, sorted_interaction_models)  # only first 3 get a medal
+}
+
+for name, metrics_dict in interaction_feature_results.items():
+    label = f"{interaction_medals.get(name, '')} {name}".strip()
+
+    model_col, accuracy_col, precision_col, recall_col, f1_col = st.columns(5)
+    model_col.write(label)
+    accuracy_col.metric(
+        "Accuracy",
+        f"{metrics_dict['accuracy'] * 100:.2f}%",
+        f"{(metrics_dict['accuracy'] - results[name]['accuracy']) * 100:.2f}%",
+    )
+    precision_col.metric(
+        "Precision",
+        f"{metrics_dict['precision'] * 100:.2f}%",
+        f"{(metrics_dict['precision'] - results[name]['precision']) * 100:.2f}%",
+    )
+    recall_col.metric(
+        "Recall",
+        f"{metrics_dict['recall'] * 100:.2f}%",
+        f"{(metrics_dict['recall'] - results[name]['recall']) * 100:.2f}%",
+    )
+    f1_col.metric(
+        "F1-Score",
+        f"{metrics_dict['f1'] * 100:.2f}%",
+        f"{(metrics_dict['f1'] - results[name]['f1']) * 100:.2f}%",
+    )
+
 st.write(
     """
-
+    After rerunning modeling on our new set of interaction features, we see that most models, save for 'Naive Bayes' and the 'QDA' models, did not experience any significant movement.
+    - This result is not suprising. From our correlation analysis we could already observe that independent signals (at least linearly) seem to be most powerful predictors.
+    - The tree models seem to move the least. For tree models such as Random Forest and XGBoost, interactions between features are inherently captured by splitting and boosted residuals. 
+    It seems that adding interaction features may be simply duplicating patterns they can learn natively.
     """
 )
 
@@ -428,7 +525,46 @@ st.subheader("Importances of Original Features vs Interaction Features")
 
 st.write(
     """
+    To qualify our negligible difference in modeling metrics with interaction features, we examine the importances assigned to features in our models.
+    """
+)
 
+lda_interaction_imp_df = pd.read_csv('cache/lda_interaction_importances.csv')
+lr_interaction_imp_df = pd.read_csv('cache/logisticregression_interaction_importances.csv')
+rf_interaction_imp_df = pd.read_csv('cache/randomforest_interaction_importances.csv')
+svm_interaction_imp_df = pd.read_csv('cache/svm_interaction_importances.csv')
+xgb_interaction_imp_df = pd.read_csv('cache/xgboost_interaction_importances.csv')
+
+logreg_int_tab, randf_int_tab, xgb_int_tab, lda_int_tab, svm_int_tab = st.tabs(
+    ["LogisticRegression", "RandomForest", "XGBoost", "LDA", "SVM"]
+)
+
+@st.cache_data()
+def plot_interaction_feature_importances(df: pd.DataFrame, name: str):
+    fig = px.bar(
+        df.sort_values('Importance', ascending=False).head(10),
+        x='Importance',
+        y='Feature',
+        orientation='h',
+        title=f'Top 10 feature importances (including interaction features): {name}'
+    )
+    return fig
+with logreg_int_tab:
+    st.plotly_chart(plot_interaction_feature_importances(lr_interaction_imp_df, "LogisticRegression"))
+with randf_int_tab:
+    st.plotly_chart(plot_interaction_feature_importances(rf_interaction_imp_df, "RandomForest"))
+with xgb_int_tab:
+    st.plotly_chart(plot_interaction_feature_importances(xgb_interaction_imp_df, "XGBoost"))
+with lda_int_tab:
+    st.plotly_chart(plot_interaction_feature_importances(lda_interaction_imp_df, "LDA"))
+with svm_int_tab:
+    st.plotly_chart(plot_interaction_feature_importances(svm_interaction_imp_df, "SVM"))
+
+st.write(
+    """
+    Plotting the interaction feature trained model importances, we observe near identical importances listed before. 
+    - Again, Age, Genetic Risk Factor (APOE-ε4 allele), and Family History of Alzheimer's seem to consistently emerge as top predictors.
+    - Again, Random Forest seems to pickup slightly differing signals, also alloting significant importance to BMI, Cognitive Test Score, and Education Level.
     """
 )
 
@@ -437,5 +573,18 @@ st.header("Conclusions", divider=True)
 st.write(
     """
     HERE SOME CONCLUSIONS
+    Keep it simple: In small tabular datasets dominated by a few strong predictors, brute-force interaction engineering offers little benefit and may hurt simpler models like Naive Bayes.
+
+    Trust non-linear ensembles: Tree-based or boosting methods already handle conditional effects; focus tuning efforts (depth, learning-rate, subsampling) there rather than expanding the feature space.
+
+    If you must explore interactions:
+
+    Use targeted, domain-driven terms (e.g., Age × Smoking) instead of exhaustive combinatorics.
+
+    Apply feature selection or regularisation paths (e.g., L1) to keep only those interactions that truly matter.
+
+    Validate robustness: Always compare against a no-interaction baseline; even “no change” is informative because it shows your model captured the key signals with far less complexity.
+    This result has important implications for screening and early detection efforts, indicating that complex interaction models may not 
+    provide significant additional predictive power beyond simpler models focusing on age, genetic factors, and family history
     """
 )
