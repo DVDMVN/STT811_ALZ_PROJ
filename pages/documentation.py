@@ -59,8 +59,11 @@ st.subheader("Sources:", divider = True)
 
 st.markdown(
     """
-    - [[1]](https://www.alz.org/alzheimers-dementia/what-is-alzheimers/causes-and-risk-factors) https://www.alz.org/alzheimers-dementia/what-is-alzheimers/causes-and-risk-factors
-    - [[2]](https://www.alzint.org/about/risk-factors-risk-reduction/) https://www.alzint.org/about/risk-factors-risk-reduction/
-    - [[3]](https://www.mayoclinic.org/diseases-conditions/alzheimers-disease/symptoms-causes/syc-20350447) https://www.mayoclinic.org/diseases-conditions/alzheimers-disease/symptoms-causes/syc-20350447
+    - [[1]](https://www.alz.org/getmedia/76e51bb6-c003-4d84-8019-e0779d8c4e8d/alzheimers-facts-and-figures.pdf) https://www.alz.org/getmedia/76e51bb6-c003-4d84-8019-e0779d8c4e8d/alzheimers-facts-and-figures.pdf
+    - [[2]](https://www.nia.nih.gov/health/alzheimers-and-dementia/alzheimers-disease-fact-sheet) https://www.nia.nih.gov/health/alzheimers-and-dementia/alzheimers-disease-fact-sheet
+    - [[3]](https://www.nia.nih.gov/health/alzheimers-causes-and-risk-factors/what-causes-alzheimers-disease) https://www.nia.nih.gov/health/alzheimers-causes-and-risk-factors/what-causes-alzheimers-disease
+    - [[4]](https://www.mayoclinic.org/diseases-conditions/alzheimers-disease/symptoms-causes/syc-20350447) https://www.mayoclinic.org/diseases-conditions/alzheimers-disease/symptoms-causes/syc-20350447
+    - [[5]](https://www.alz.org/getmedia/dbc8fd3f-a1a8-4cfd-8c40-acb89fd65b23/annual-report-2024.pdf) https://www.alz.org/getmedia/dbc8fd3f-a1a8-4cfd-8c40-acb89fd65b23/annual-report-2024.pdf
+    - [[6]](https://jamanetwork.com/journals/jamapsychiatry/fullarticle/2272732#google_vignette) https://jamanetwork.com/journals/jamapsychiatry/fullarticle/2272732#google_vignette
     """
 )

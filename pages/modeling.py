@@ -214,13 +214,13 @@ st.write(
 
     - Important note: True distribution of Alzheimer's for the population is not so uniformly distributed as our dataset, this accuracy does not truly represent
     population distribution.
-        - For reference, the true metric is closer to about 1 in 9 people age 65 or older [Link](https://www.alz.org/getmedia/76e51bb6-c003-4d84-8019-e0779d8c4e8d/alzheimers-facts-and-figures.pdf)
+        - For reference, the true metric is closer to about 1 in 9 people age 65 or older [[1]](https://www.alz.org/getmedia/76e51bb6-c003-4d84-8019-e0779d8c4e8d/alzheimers-facts-and-figures.pdf)
     """
 )
 
 st.write(
     """
-    - The relatively good performance of this model highlights a strong association between age and Alzheimer's disease prevalence, which is very commonly referenced in research as the best predictor [Link](https://www.alz.org/getmedia/dbc8fd3f-a1a8-4cfd-8c40-acb89fd65b23/annual-report-2024.pdf).
+    - The relatively good performance of this model highlights a strong association between age and Alzheimer's disease prevalence, which is very commonly referenced in research as the best predictor [[5]](https://www.alz.org/getmedia/dbc8fd3f-a1a8-4cfd-8c40-acb89fd65b23/annual-report-2024.pdf).
     - As this benchmark does not require any additional information other than testing for age, we use this result as a reference point to evaluate whether machine learning models 
     are able to incorporate richer feature sets and capture more complex patterns.
     """
@@ -403,10 +403,10 @@ st.write(
     - Family history of dementia seems to be the next-most influential variable.
 
     Some country of residence dummies climb the ranking in tree-based models, but their contributions are small. We suspect that this may be reflective of sample bias rather than genuine epidemiological differences, 
-    though this area of Alzheimer's risk factor studies is one not very well researched [Link](https://www.alz.org/getmedia/76e51bb6-c003-4d84-8019-e0779d8c4e8d/alzheimers-facts-and-figures.pdf).
+    though this area of Alzheimer's risk factor studies is one not very well researched [[1]](https://www.alz.org/getmedia/76e51bb6-c003-4d84-8019-e0779d8c4e8d/alzheimers-facts-and-figures.pdf).
     
     With this dataset, we are able to reproduce the most well known narrative regarding Alzheimer's risk association with age and other herditary factors, but we fail to reproduce supplementary, well tested, results regarding
-      lifestyle variables such as smoking, obesity, and depression [Link](https://jamanetwork.com/journals/jamapsychiatry/fullarticle/2272732#google_vignette)
+      lifestyle variables such as smoking, obesity, and depression [[6]](https://jamanetwork.com/journals/jamapsychiatry/fullarticle/2272732#google_vignette).
     """
 )
 
@@ -572,19 +572,21 @@ st.header("Conclusions", divider=True)
 
 st.write(
     """
-    HERE SOME CONCLUSIONS
-    Keep it simple: In small tabular datasets dominated by a few strong predictors, brute-force interaction engineering offers little benefit and may hurt simpler models like Naive Bayes.
+    Our analysis, both qualitatively and quantitatively with machine learning, points to tabular data on Alzheimer's disease being dominated in importance by a few strong predictors. These predictors also turn out to be
+    largely out of control for individuals, namely:
+    - Age
+    - Genetic Risk Factor (APOE-ε4 allele)
+    - Family History of Alzheimer's
 
-    Trust non-linear ensembles: Tree-based or boosting methods already handle conditional effects; focus tuning efforts (depth, learning-rate, subsampling) there rather than expanding the feature space.
+    > This result lines up with the top three associated predictors found by the Alzheimer's Association [[1]](https://www.alz.org/getmedia/76e51bb6-c003-4d84-8019-e0779d8c4e8d/alzheimers-facts-and-figures.pdf).
 
-    If you must explore interactions:
+    With this in mind, when using tabular data we recommend keeping models simple.
+    - Even a simple benchmark conditional only on age proves to be nearly as performant as our complex models.
 
-    Use targeted, domain-driven terms (e.g., Age × Smoking) instead of exhaustive combinatorics.
+    From our machine learning analysis, while most models were similar in performance, we recommend non-linear tree ensembles as a primary model.
+    - Evidently, they are able to capture the interaction space without exhaustively adding these features.
 
-    Apply feature selection or regularisation paths (e.g., L1) to keep only those interactions that truly matter.
-
-    Validate robustness: Always compare against a no-interaction baseline; even “no change” is informative because it shows your model captured the key signals with far less complexity.
     This result has important implications for screening and early detection efforts, indicating that complex interaction models may not 
-    provide significant additional predictive power beyond simpler models focusing on age, genetic factors, and family history
+    provide significant additional predictive power beyond simpler models focusing on age, genetic factors, and family history.
     """
 )

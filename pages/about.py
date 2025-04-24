@@ -43,7 +43,7 @@ with overview:
 
     st.write(
         """
-        In this project, we utilize a dataset from kaggle: [Kaggle](https://www.kaggle.com/datasets/ankushpanday1/alzheimers-prediction-dataset-global)
+        In this project, we utilize a dataset from kaggle: [Link to Dataset](https://www.kaggle.com/datasets/ankushpanday1/alzheimers-prediction-dataset-global)
 
         This dataset is a collection of patient observations documenting risk factors associated with Alzheimer's disease, as well as their specific diagnosis.
         - The data has a global perspective, coming from 20 different countries across the world, including the United States, United Kingdom, China, India, Brazil and many more, 
