@@ -313,19 +313,17 @@ st.write(
 
 st.subheader("Feature Importances", divider=True)
 
-
-st.write("Exploratory analysis based on the coded dataset.")
-
 st.write(
     """
-    Only some models have feature_importances_ or coef_, the most straightforward metrics for feature importance. 
+    Note: Only some models have relevant direct feature importances:
+    - "feature_importances_ or coef_, the most straightforward metrics for feature importance. 
     We will only be doing feature importance analysis on those models that have such attributes:
     """
 )
 
 st.write(
     """
-        Find the most important features through visualization：
+    Find the most important features through visualization：
     """
 )
 
@@ -401,6 +399,7 @@ st.write(
 
 st.write(
     """
+
     """
 )
 
@@ -408,6 +407,7 @@ st.subheader("Importances of Original Features vs Interaction Features")
 
 st.write(
     """
+
     """
 )
 
