@@ -206,8 +206,13 @@ benchmark_accuracy = (benchmark_predictions.values == alzheimers_encoded['Alzhei
 st.write(
     f"""
     Such a model already gives an accuracy of {benchmark_accuracy * 100:.2f}%!
-    - This benchmark serves to...
-    - TODO: WRITE ABOUT BENCHMARK CONTEXT
+    
+    - This benchmark serves to establish a simple and intuitive baselineto compare with more complex machine learning models. 
+    We predict a diagnosis of Alzheimer's disease based solely on whether the patient's age is above the population mean (71.96).
+    It does not require any additional information other than testing for age, a well-known risk factor. 
+    Although this test is simple, our baseline achieved a good accuracy. 
+    This suggests that there is a strong association between age and Alzheimer's disease prevalence. 
+    We use this result as a reference point to evaluate whether machine learning models are able to incorporate richer feature sets and capture more complex patterns.
     """
 )
 
@@ -307,7 +312,23 @@ for name, metrics_dict in results.items():
 
 st.write(
     """
-    TODO:
+    Among our eight models, Random Forest performed the best, followed by XGBoost, LDA, etc., with an accuracy of about 71%. 
+    These models showed balanced precision, recall, and F1 scores, indicating strong and reliable performance.
+    """
+)
+
+st.write(
+    """
+    In contrast, Naive Bayes, QDA, and KNN performed significantly worse (accuracy of about 63-66%). 
+    This may be due to the fact that these models are not good at handling complex feature relationships or high-dimensional data.
+    """
+)
+
+st.write(
+    """
+    In general, tree-based ensemble models and well-regularized linear classifiers are good choices for predicting Alzheimer's disease diagnosis. 
+    In particular, Random Forest not only performs well in accuracy, but also performs better in other importance indicators. 
+    Therefore, Random Forest is our ideal choice for predicting and analyzing risk factors.
     """
 )
 
