@@ -2,6 +2,9 @@
 
 ### Files:
 
+📁 `cache`
+- Folder holding cached modeling results and model importances. Due to streamlit data limitations, caches are used for saving time and resources.
+
 📁 `data`
 - Folder holding our dataset(s).
 
@@ -19,9 +22,6 @@
 
 📄 `util.py`
 - Global helper functions. May be refactored later to be more specified.
-
-📔 `download_dataset.ipynb`
-- Some code to download the dataset using the python kaggle API. Since the data is small enough, the data can be uploaded to GitHub without replication issue, so this notebook may not be used.
 
 📓 `master_notebook.ipynb`
 - Conglomerate master notebook for exploration of the data in an interactive manner.
