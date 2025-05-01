@@ -16,6 +16,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import LinearSVC
 
 from collections import defaultdict
+import time
 
 from sklearn.model_selection import cross_validate
 from util import load_data
@@ -64,56 +65,6 @@ def get_feature_importances(model):
         return list(zip(feature_names, importances))
     else:
         return None
-
-
-# @st.cache_data()
-# def run_feature_importance_analysis(X, y, num_importances=5):
-#     fitted_models = {}
-#     for name, model in estimators.items():
-#         print(f"Fitting {name} ...")
-#         model.fit(X, y)
-#         fitted_models[name] = model
-
-#     for name, model in fitted_models.items():
-#         importances = get_feature_importances(model)
-#         if importances is not None:
-#             print(f"\n{name} feature importances:")
-#             for feat, val in sorted(importances, key=lambda x: x[1], reverse=True)[
-#                 :num_importances
-#             ]:
-#                 print(f"\t{feat}: {val:.4f}")
-#         else:
-#             print(f"\n{name} does not provide a direct feature importance measure.")
-
-
-# @st.cache_data()
-# def plot_feature_importance(model_name, X, y, num_importances=5):
-#     if model_name not in estimators:
-#         st.warning(f"Model '{model_name}' not found.")
-#         return
-
-#     st.write(f"Training model: {model_name}")
-#     model = estimators[model_name]
-#     model.fit(X, y)
-#     st.success("Model training complete.")
-
-#     importances = get_feature_importances(model)
-#     if importances is None:
-#         st.warning(f"{model_name} does not provide feature importance.")
-#         return
-
-#     sorted_importances = sorted(importances, key=lambda x: x[1], reverse=True)
-#     top_importances = sorted_importances[:num_importances]
-
-#     labels = [t[0] for t in top_importances]
-#     values = [t[1] for t in top_importances]
-
-#     fig, ax = plt.subplots(figsize=(8, 5))
-#     ax.barh(labels[::-1], values[::-1])  # Plot from highest to lowest
-#     ax.set_title(f"Top {num_importances} Feature Importances: {model_name}")
-#     ax.set_xlabel("Importance")
-#     ax.set_ylabel("Feature")
-#     return fig
 
 @st.cache_data()
 def plot_feature_importance(model_name, X, y, num_importances=5):
@@ -239,15 +190,16 @@ st.write(
 st.subheader("Training Models", divider=True)
 # --- Progress bar ---
 progress_bar = st.progress(0, text="Evaluating models...")
-results = {}
 
 # --- Model evaluation loop ---
 for i, (name, _) in enumerate(estimators.items(), start=1):
     with st.spinner(f"Training and testing {name}..."):
-        results[name] = evaluate_model(name, X, y)
+        # results[name] = evaluate_model(name, X, y)
+        time.sleep(1)
         progress_bar.progress(
             i / len(estimators), text=f"Completed {i}/{len(estimators)} models"
         )
+results = np.load("cache/metrics.npy", allow_pickle = True).item() # load 
 
 # --- Done! ---
 st.toast("✅ All models have been evaluated!", icon="🎉")

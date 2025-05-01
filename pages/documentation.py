@@ -65,5 +65,7 @@ st.markdown(
     - [[4]](https://www.mayoclinic.org/diseases-conditions/alzheimers-disease/symptoms-causes/syc-20350447) https://www.mayoclinic.org/diseases-conditions/alzheimers-disease/symptoms-causes/syc-20350447
     - [[5]](https://www.alz.org/getmedia/dbc8fd3f-a1a8-4cfd-8c40-acb89fd65b23/annual-report-2024.pdf) https://www.alz.org/getmedia/dbc8fd3f-a1a8-4cfd-8c40-acb89fd65b23/annual-report-2024.pdf
     - [[6]](https://jamanetwork.com/journals/jamapsychiatry/fullarticle/2272732#google_vignette) https://jamanetwork.com/journals/jamapsychiatry/fullarticle/2272732#google_vignette
+    - [[7]](https://arxiv.org/abs/2305.19280) https://arxiv.org/abs/2305.19280
+    - [[8]](https://arxiv.org/abs/2501.00861) https://arxiv.org/abs/2501.00861
     """
 )
