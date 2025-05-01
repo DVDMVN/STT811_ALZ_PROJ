@@ -4,16 +4,11 @@ import seaborn as sns
 import plotly.express as px
 import pandas as pd
 
-import io
 import numpy as np
 
 from imblearn.under_sampling import RandomUnderSampler
 
-from sklearn.model_selection import cross_validate
 from util import load_data
-
-# -------------- FUNCTIONS --------------
-
 
 # -------------- VARIABLES --------------
 
@@ -23,6 +18,8 @@ X = alzheimers_encoded.drop(columns=["Alzheimers_Diagnosis_Yes"])
 y = alzheimers_encoded["Alzheimers_Diagnosis_Yes"]
 feature_names_orig = alzheimers.columns
 feature_names = X.columns
+
+# -------------- PAGE --------------
 
 st.title("About the Data 💾")
 

@@ -23,7 +23,7 @@ st.write(
     
     Alzheimer's disease is an irreversible, progression neurodegenerative disorder characterized by memory loss, mental dysfunction, 
     and changes in personality. Eventually, neuronal damage of Alzheimer's becomes so extensive, parts of the brain that enable basic bodily functions, 
-    such as walking or swallowing, may be limited. Loss of mobility paired with cognitive limitations causes required on the clock care. Utimately, the disease is fatal.
+    such as walking or swallowing, may be limited. Loss of mobility paired with cognitive limitations causes required on the clock care. Ultimately, the disease is fatal.
     
     Based on the AA (Alzheimer's Association) 2024 annual review [[1]](https://www.alz.org/getmedia/76e51bb6-c003-4d84-8019-e0779d8c4e8d/alzheimers-facts-and-figures.pdf):
     - Alzheimer's is the most common cause of dementia, accounting for an estimated 60 - 80% of cases.
@@ -60,7 +60,7 @@ st.plotly_chart(plot_AA_agegroup_alz_percentages())
 st.write(
     """
     Though Alzheimer's and other dimentia related diseases are among the most researched in the world, the causes of Alzheimer's disease remain poorly understood [[2]](https://www.nia.nih.gov/health/alzheimers-and-dementia/alzheimers-disease-fact-sheet). Still, many
-    prevaling risk factors emerge from popular literature and scientific articles alike. Among the most commonly referenced are, age, genetics, and health / lifestyle factors 
+    prevailing risk factors emerge from popular literature and scientific articles alike. Among the most commonly referenced are, age, genetics, and health / lifestyle factors 
     [[3]](https://www.nia.nih.gov/health/alzheimers-causes-and-risk-factors/what-causes-alzheimers-disease)
     [[4]](https://www.mayoclinic.org/diseases-conditions/alzheimers-disease/symptoms-causes/syc-20350447).
     """

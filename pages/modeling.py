@@ -1,6 +1,4 @@
 import streamlit as st
-import matplotlib.pyplot as plt
-import seaborn as sns
 import plotly.express as px
 import pandas as pd
 import numpy as np
@@ -16,8 +14,6 @@ from sklearn.discriminant_analysis import (
 )
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import LinearSVC
-
-from imblearn.over_sampling import SMOTE
 
 from collections import defaultdict
 
@@ -38,9 +34,6 @@ estimators = {
 
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=1337)
 
-# -------------- FUNCTIONS --------------
-
-
 @st.cache_data()
 def evaluate_model(estimator_name, X, y):
     scoring = ["accuracy", "precision_macro", "recall_macro", "f1_macro"]
@@ -56,7 +49,6 @@ def evaluate_model(estimator_name, X, y):
         "f1": np.mean(cv_results["test_f1_macro"]),
     }
     return metrics
-
 
 def get_feature_importances(model):
     # Tree based models usually have a feature_importances_ attribute
@@ -123,7 +115,6 @@ def get_feature_importances(model):
 #     ax.set_ylabel("Feature")
 #     return fig
 
-
 @st.cache_data()
 def plot_feature_importance(model_name, X, y, num_importances=5):
     if model_name not in estimators:
@@ -152,11 +143,6 @@ def plot_feature_importance(model_name, X, y, num_importances=5):
         labels={"x": "Importance", "y": "Feature"},
         title=f"Top {num_importances} Feature Importances: {model_name}",
     )
-    # fig.update_layout(
-    #     yaxis=dict(tickfont=dict(size=12)),
-    #     xaxis=dict(tickfont=dict(size=12)),
-    #     margin=dict(l=100, r=20, t=50, b=50)
-    # )
     return fig
 
 
@@ -226,7 +212,7 @@ st.write(
     """
 )
 
-st.header("Maching Learning Analysis", divider=True)
+st.header("Machine Learning Analysis", divider=True)
 
 st.write(
     """
@@ -446,8 +432,6 @@ st.write(
     dominance in linear correlation even after introducing interaction terms.
     - Specifically, Age, Genetic Risk Factor (APOE-ε4 allele), and Family History of Alzheimer's still emerge as top correlators, with their individual importance coefficients 
     significantly higher than any interaction terms.
-    - Geographic variables seem to come up fourth after the main three, but their predictive power was substantially lowe. Again, we hypothesize that this represents demographic sampling variations rather than 
-    true geographic effects on disease prevalence.
 
     The absence of strong interaction effects suggests that these primary risk factors operate largely independently rather than synergistically in predicting Alzheimer's diagnosis.
     """
@@ -580,13 +564,17 @@ st.write(
 
     > This result lines up with the top three associated predictors found by the Alzheimer's Association [[1]](https://www.alz.org/getmedia/76e51bb6-c003-4d84-8019-e0779d8c4e8d/alzheimers-facts-and-figures.pdf).
 
+    Ultimately, no particular modeling results were especially inspiring. Lifestyle and demographic data features from this dataset showed to very predictive poorly predictive, contrary to many articles [[6]](https://jamanetwork.com/journals/jamapsychiatry/fullarticle/2272732#google_vignette).
+
     With this in mind, when using tabular data we recommend keeping models simple.
     - Even a simple benchmark conditional only on age proves to be nearly as performant as our complex models.
+    - Complex interaction models may not provide significant additional predictive power beyond simpler models focusing on age, genetic factors, and family history.
 
-    From our machine learning analysis, while most models were similar in performance, we recommend non-linear tree ensembles as a primary model.
-    - Evidently, they are able to capture the interaction space without exhaustively adding these features.
+    From our machine learning analysis, while most models were similar in performance, we recommend non-linear tree ensembles as a primary model. Evidently, they are able to capture the interaction space without exhaustively adding these features.
+    In this case, because of their indifference in performance after the addition of these terms, we regard these models as
+     more robust than the others, able to capture the strongest signal amongst noisy or less relevant features.
 
-    This result has important implications for screening and early detection efforts, indicating that complex interaction models may not 
-    provide significant additional predictive power beyond simpler models focusing on age, genetic factors, and family history.
+    Modern literature points to usage of image data or a combination of image and tabular (multi-modal) for producing more precise and confident results [[7]](https://arxiv.org/abs/2305.19280) [[8]](https://arxiv.org/abs/2501.00861).
+    For this reason, it is recommended to not rely on tabular data purely to conduct diagnosis.
     """
 )
